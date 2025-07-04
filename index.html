@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PT. Teknologi Maju Indonesia - Company Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            padding: 120px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card {
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            border: none;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 117, 252, 0.4);
+        }
+
+        .fab-chatbot {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            border: none;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 8px 25px rgba(37, 117, 252, 0.4);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .chat-container {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: linear-gradient(145deg, #f8f9fa, #ffffff);
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 18px;
+            max-width: 80%;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .user-message {
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            color: white;
+            margin-left: auto;
+            text-align: right;
+            box-shadow: 0 4px 12px rgba(37, 117, 252, 0.3);
+        }
+
+        .bot-message {
+            background: white;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ff6b6b, #ff5252);
+            color: white;
+            border: none;
+        }
+
+        .typing-indicator {
+            display: none;
+            font-style: italic;
+            color: #6c757d;
+            padding: 15px 20px;
+            background: #f8f9fa;
+        }
+
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1001;
+            display: none;
+        }
+
+        .status-online {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-offline {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+
+        .message-content h1,
+        .message-content h2,
+        .message-content h3 {
+            margin-top: 1em;
+            margin-bottom: 0.5em;
+            font-weight: bold;
+        }
+
+        .message-content ul,
+        .message-content ol {
+            margin-left: 1.2em;
+        }
+
+        .message-content pre,
+        .message-content code {
+            background: #f6f8fa;
+            border-radius: 5px;
+            padding: 2px 6px;
+            font-family: 'Fira Mono', 'Consolas', monospace;
+            font-size: 0.95em;
+        }
+
+        .message-content a {
+            color: #2575fc;
+            text-decoration: underline;
+        }
+
+        .ai-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        .ai-ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .ai-fallback {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Status Indicator -->
+    <div id="statusIndicator" class="status-indicator">
+        <i class="bi bi-wifi"></i> <span id="statusText">Ready</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: rgba(0,0,0,0.95) !important;">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#home">
+                <i class="bi bi-building"></i> PT. Teknologi Maju Indonesia
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about">Tentang</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#careers">Karir</a></li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light btn-sm ms-2" id="openChatModal">
+                            <i class="bi bi-chat-dots"></i> AI Assistant
+                            <span id="aiStatus" class="ai-status ai-ready">Ready</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+        <div class="container text-center position-relative">
+            <h1 class="display-4 fw-bold mb-4">PT. Teknologi Maju Indonesia</h1>
+            <p class="lead mb-5">Perusahaan teknologi terdepan yang mengembangkan solusi inovatif untuk transformasi
+                digital Indonesia.</p>
+            <div class="d-flex gap-3 justify-content-center flex-wrap">
+                <button class="btn btn-light btn-lg" id="herooChatButton">
+                    <i class="bi bi-chat-dots"></i> Tanya AI Assistant
+                </button>
+                <a href="#careers" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-briefcase"></i> Lihat Lowongan
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="section-padding" style="padding: 100px 0;">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center mb-5">
+                    <h2 class="display-5 fw-bold mb-4">Tentang Perusahaan</h2>
+                    <p class="lead text-muted">Perusahaan teknologi terdepan yang mengembangkan solusi inovatif untuk
+                        transformasi digital Indonesia.</p>
+                </div>
+            </div>
+            <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                    <div class="card h-100 border-0">
+                        <div class="card-body text-center p-5">
+                            <i class="bi bi-eye fs-1 mb-4"
+                                style="background: linear-gradient(135deg, #2575fc, #6a11cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                            <h4 class="fw-bold mb-3">Visi</h4>
+                            <p class="text-muted">Menjadi perusahaan teknologi terkemuka di Asia Tenggara yang
+                                memberikan solusi terbaik untuk masa depan digital.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 border-0">
+                        <div class="card-body text-center p-5">
+                            <i class="bi bi-target fs-1 mb-4"
+                                style="background: linear-gradient(135deg, #2575fc, #6a11cb); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                            <h4 class="fw-bold mb-3">Misi</h4>
+                            <p class="text-muted">Mengembangkan teknologi yang memudahkan kehidupan masyarakat dan
+                                mendorong pertumbuhan ekonomi digital Indonesia.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Careers Section -->
+    <section id="careers" class="section-padding"
+        style="padding: 100px 0; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold mb-4">Lowongan Kerja</h2>
+                <p class="lead text-muted">Bergabunglah dengan tim terbaik kami dan wujudkan karir impian Anda</p>
+            </div>
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0" style="border-radius: 20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title mb-0 fw-bold">Senior Frontend Developer</h5>
+                                <span class="badge bg-primary">Full-time</span>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-building me-1"></i> Engineering |
+                                    <i class="bi bi-geo-alt me-1"></i> Jakarta/Remote
+                                </small>
+                            </div>
+                            <div class="mb-4">
+                                <strong class="text-dark">Requirements:</strong>
+                                <ul class="list-unstyled mt-2">
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-2"></i>
+                                        React.js/Vue.js</li>
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-2"></i> JavaScript
+                                        ES6+</li>
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-2"></i> 3+ tahun
+                                        pengalaman</li>
+                                </ul>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-success fw-bold">
+                                    <i class="bi bi-currency-dollar"></i> 15-25 juta
+                                </span>
+                                <button class="btn btn-primary ask-chatbot" data-job="Senior Frontend Developer">
+                                    <i class="bi bi-chat-dots"></i> Tanya AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100 border-0" style="border-radius: 20px;">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title mb-0 fw-bold">Data Scientist</h5>
+                                <span class="badge bg-primary">Full-time</span>
+                            </div>
+                            <div class="mb-3">
+                                <small class="text-muted">
+                                    <i class="bi bi-building me-1"></i> Data & Analytics |
+                                    <i class="bi bi-geo-alt me-1"></i> Jakarta
+                                </small>
+                            </div>
+                            <div class="mb-4">
+                                <strong class="text-dark">Requirements:</strong>
+                                <ul class="list-unstyled mt-2">
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-2"></i> Python/R</li>
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-2"></i> Machine
+                                        Learning</li>
+                                    <li class="mb-1"><i class="bi bi-check-circle text-success me-2"></i> 2+ tahun
+                                        pengalaman</li>
+                                </ul>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-success fw-bold">
+                                    <i class="bi bi-currency-dollar"></i> 18-30 juta
+                                </span>
+                                <button class="btn btn-primary ask-chatbot" data-job="Data Scientist">
+                                    <i class="bi bi-chat-dots"></i> Tanya AI
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Floating Action Button -->
+    <button class="fab-chatbot" id="fabChatbot" title="Buka AI Assistant">
+        <i class="bi bi-robot"></i>
+    </button>
+
+    <!-- Chat Modal -->
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="border-radius: 20px;">
+                <div class="modal-header" style="background: linear-gradient(135deg, #2575fc, #6a11cb); color: white;">
+                    <h5 class="modal-title fw-bold" id="chatModalLabel">
+                        <i class="bi bi-robot me-2"></i> AI Assistant - PT. Teknologi Maju Indonesia
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div id="chatContainer" class="chat-container">
+                        <div class="message bot-message">
+                            <i class="bi bi-robot me-2"></i>
+                            <span class="message-content">Halo! Saya AI Assistant dari PT. Teknologi Maju Indonesia.
+                                Saya siap membantu Anda dengan informasi perusahaan dan lowongan kerja. Apa yang ingin
+                                Anda ketahui?</span>
+                        </div>
+                    </div>
+                    <div class="typing-indicator">
+                        <i class="bi bi-three-dots"></i> AI sedang mengetik...
+                    </div>
+                </div>
+                <div class="modal-footer" style="background: #f8f9fa;">
+                    <div class="input-group">
+                        <input type="text" id="messageInput" class="form-control" placeholder="Ketik pesan Anda..."
+                            autocomplete="off">
+                        <button id="sendButton" class="btn btn-primary">
+                            <i class="bi bi-send"></i>
+                        </button>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-2 w-100">
+                        <button id="resetChat" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-clockwise"></i> Reset Chat
+                        </button>
+                        <small class="text-muted">
+                            <span id="connectionStatus">
+                                <i class="bi bi-circle-fill text-success me-1"></i> AI Ready
+                            </span>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // ============================================================================
+        // STANDALONE SMART AI ASSISTANT - LANGSUNG JALAN TANPA SERVER
+        // ============================================================================
+
+        console.log('🚀 Initializing PT. Teknologi Maju Indonesia Smart AI Assistant...');
+
+        // Company data lengkap
+        const COMPANY_DATA = {
+            profile: {
+                name: "PT. Teknologi Maju Indonesia",
+                description: "Perusahaan teknologi terdepan yang mengembangkan solusi inovatif untuk transformasi digital Indonesia.",
+                vision: "Menjadi perusahaan teknologi terkemuka di Asia Tenggara yang memberikan solusi terbaik untuk masa depan digital.",
+                mission: "Mengembangkan teknologi yang memudahkan kehidupan masyarakat dan mendorong pertumbuhan ekonomi digital Indonesia.",
+                established: "2015",
+                employees: "500+",
+                location: "Jakarta, Indonesia",
+                email: "hr@teknologimaju.co.id",
+                website: "www.teknologimaju.co.id"
+            },
+            jobs: [
+                {
+                    id: 1,
+                    title: "Senior Frontend Developer",
+                    department: "Engineering",
+                    type: "Full-time",
+                    location: "Jakarta/Remote",
+                    requirements: ["React.js/Vue.js", "JavaScript ES6+", "3+ tahun pengalaman", "HTML/CSS", "Git"],
+                    salary_range: "15-25 juta",
+                    benefits: ["Asuransi kesehatan", "Flexible working hours", "Learning budget", "Annual bonus"],
+                    description: "Mengembangkan aplikasi web modern dengan teknologi terdepan untuk transformasi digital Indonesia."
+                },
+                {
+                    id: 2,
+                    title: "Data Scientist",
+                    department: "Data & Analytics",
+                    type: "Full-time",
+                    location: "Jakarta",
+                    requirements: ["Python/R", "Machine Learning", "SQL", "2+ tahun pengalaman", "Statistics"],
+                    salary_range: "18-30 juta",
+                    benefits: ["Asuransi kesehatan", "Conference budget", "Research time", "GPU access"],
+                    description: "Menganalisis data untuk memberikan insights bisnis dan mengembangkan model AI/ML."
+                },
+                {
+                    id: 3,
+                    title: "Product Manager",
+                    department: "Product",
+                    type: "Full-time",
+                    location: "Jakarta",
+                    requirements: ["Product Management", "Agile/Scrum", "5+ tahun pengalaman", "Analytics", "Leadership"],
+                    salary_range: "20-35 juta",
+                    benefits: ["Asuransi kesehatan", "Stock options", "Leadership training", "Product tools access"],
+                    description: "Memimpin pengembangan produk dan strategi untuk mencapai tujuan bisnis perusahaan."
+                },
+                {
+                    id: 4,
+                    title: "DevOps Engineer",
+                    department: "Engineering",
+                    type: "Full-time",
+                    location: "Jakarta/Remote",
+                    requirements: ["Docker/Kubernetes", "AWS/GCP", "CI/CD", "3+ tahun pengalaman", "Linux"],
+                    salary_range: "16-28 juta",
+                    benefits: ["Asuransi kesehatan", "Cloud certification budget", "24/7 support bonus", "Flexible hours"],
+                    description: "Mengelola infrastructure dan deployment untuk mendukung skalabilitas aplikasi."
+                }
+            ],
+            faqs: [
+                {
+                    question: "Bagaimana cara melamar?",
+                    answer: "Kirim CV dan portfolio ke hr@teknologimaju.co.id dengan subject: [Nama Posisi] - [Nama Anda]"
+                },
+                {
+                    question: "Apakah ada program magang?",
+                    answer: "Ya, kami memiliki program magang 3-6 bulan untuk fresh graduate dengan mentoring intensif."
+                },
+                {
+                    question: "Bagaimana work life balance di sini?",
+                    answer: "Kami menerapkan flexible working hours dan hybrid work. Work-life balance adalah prioritas kami."
+                }
+            ]
+        };
+
+        // Smart Response Engine - AI Assistant yang Cerdas
+        class SmartAIAssistant {
+            constructor() {
+                this.chatHistory = [];
+                this.currentContext = null;
+                this.userProfile = {};
+                this.initializeAI();
+            }
+
+            initializeAI() {
+                console.log('🤖 Smart AI Assistant Ready!');
+                this.updateStatus('AI Ready', 'success');
+            }
+
+            updateStatus(message, type = 'info') {
+                const statusIndicator = document.getElementById('statusIndicator');
+                const statusText = document.getElementById('statusText');
+                const aiStatus = document.getElementById('aiStatus');
+
+                if (statusIndicator && statusText) {
+                    statusText.textContent = message;
+                    statusIndicator.className = `status-indicator status-${type === 'success' ? 'online' : 'offline'}`;
+                    statusIndicator.style.display = 'block';
+                    setTimeout(() => {
+                        statusIndicator.style.display = 'none';
+                    }, 2000);
+                }
+
+                if (aiStatus) {
+                    aiStatus.textContent = message;
+                    aiStatus.className = `ai-status ${type === 'success' ? 'ai-ready' : 'ai-fallback'}`;
+                }
+            }
+
+            // Analyze user intent dan context
+            analyzeIntent(message) {
+                const msg = message.toLowerCase();
+                
+                // Intent detection patterns
+                const intents = {
+                    greeting: ['halo', 'hello', 'hai', 'selamat', 'good'],
+                    jobs: ['lowongan', 'kerja', 'karir', 'job', 'posisi', 'career', 'hiring'],
+                    salary: ['gaji', 'salary', 'upah', 'bayaran', 'kompensasi'],
+                    company: ['perusahaan', 'company', 'tentang', 'about', 'profil', 'sejarah'],
+                    application: ['lamar', 'apply', 'melamar', 'cara', 'how', 'kirim', 'cv'],
+                    benefits: ['benefit', 'tunjangan', 'fasilitas', 'bonus', 'asuransi'],
+                    specific_job: ['frontend', 'backend', 'data', 'scientist', 'devops', 'product', 'manager'],
+                    location: ['lokasi', 'location', 'kantor', 'alamat', 'dimana'],
+                    remote: ['remote', 'wfh', 'work from home', 'online'],
+                    culture: ['budaya', 'culture', 'lingkungan', 'team', 'tim']
+                };
+
+                let detectedIntent = 'general';
+                let confidence = 0;
+
+                for (const [intent, keywords] of Object.entries(intents)) {
+                    const matches = keywords.filter(keyword => msg.includes(keyword)).length;
+                    const intentConfidence = matches / keywords.length;
+                    
+                    if (intentConfidence > confidence) {
+                        confidence = intentConfidence;
+                        detectedIntent = intent;
+                    }
+                }
+
+                // Extract entities
+                const entities = this.extractEntities(message);
+
+                return {
+                    intent: detectedIntent,
+                    confidence: confidence,
+                    entities: entities,
+                    originalMessage: message
+                };
+            }
+
+            extractEntities(message) {
+                const entities = {
+                    jobTitles: [],
+                    departments: [],
+                    locations: [],
+                    salaryRange: null
+                };
+
+                const msg = message.toLowerCase();
+
+                // Job titles
+                COMPANY_DATA.jobs.forEach(job => {
+                    if (msg.includes(job.title.toLowerCase()) || 
+                        job.title.toLowerCase().split(' ').some(word => msg.includes(word))) {
+                        entities.jobTitles.push(job);
+                    }
+                });
+
+                // Departments
+                const departments = ['engineering', 'data', 'product', 'hr', 'finance'];
+                departments.forEach(dept => {
+                    if (msg.includes(dept)) {
+                        entities.departments.push(dept);
+                    }
+                });
+
+                // Locations
+                if (msg.includes('jakarta') || msg.includes('jkt')) entities.locations.push('Jakarta');
+                if (msg.includes('remote')) entities.locations.push('Remote');
+
+                return entities;
+            }
+
+            // Generate smart response berdasarkan context
+            generateResponse(userMessage) {
+                const analysis = this.analyzeIntent(userMessage);
+                this.currentContext = analysis;
+
+                console.log('🧠 Intent Analysis:', analysis);
+
+                // Update user profile based on conversation
+                this.updateUserProfile(analysis);
+
+                // Generate contextual response
+                let response = '';
+
+                switch (analysis.intent) {
+                    case 'greeting':
+                        response = this.generateGreetingResponse();
+                        break;
+                    case 'jobs':
+                        response = this.generateJobsResponse(analysis.entities);
+                        break;
+                    case 'specific_job':
+                        response = this.generateSpecificJobResponse(analysis.entities);
+                        break;
+                    case 'salary':
+                        response = this.generateSalaryResponse();
+                        break;
+                    case 'company':
+                        response = this.generateCompanyResponse();
+                        break;
+                    case 'application':
+                        response = this.generateApplicationResponse();
+                        break;
+                    case 'benefits':
+                        response = this.generateBenefitsResponse();
+                        break;
+                    case 'location':
+                        response = this.generateLocationResponse();
+                        break;
+                    case 'remote':
+                        response = this.generateRemoteResponse();
+                        break;
+                    case 'culture':
+                        response = this.generateCultureResponse();
+                        break;
+                    default:
+                        response = this.generateGeneralResponse(userMessage);
+                }
+
+                // Add follow-up suggestions
+                response += this.generateFollowUpSuggestions(analysis);
+
+                return response;
+            }
+
+            updateUserProfile(analysis) {
+                if (analysis.entities.jobTitles.length > 0) {
+                    this.userProfile.interestedJobs = analysis.entities.jobTitles;
+                }
+                if (analysis.entities.locations.length > 0) {
+                    this.userProfile.preferredLocation = analysis.entities.locations;
+                }
+            }
+
+            generateGreetingResponse() {
+                const greetings = [
+                    `Halo! Selamat datang di **${COMPANY_DATA.profile.name}** 🎉`,
+                    `Hello! Senang bertemu dengan Anda di **${COMPANY_DATA.profile.name}** 👋`,
+                    `Hai! Terima kasih telah mengunjungi **${COMPANY_DATA.profile.name}** ✨`
+                ];
+
+                const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+
+                return `${randomGreeting}
+
+Saya **AI Assistant** yang siap membantu Anda dengan:
+
+🏢 **Informasi Perusahaan** - Profil, visi, misi, dan sejarah kami
+💼 **Lowongan Kerja** - ${COMPANY_DATA.jobs.length} posisi menarik tersedia
+💰 **Gaji & Benefits** - Informasi kompensasi dan tunjangan
+📍 **Lokasi & Remote Work** - Fleksibilitas kerja
+🎯 **Cara Melamar** - Panduan step-by-step
+
+**Quick Start:**
+• Ketik **"lowongan kerja"** untuk melihat semua posisi
+• Sebut nama posisi (misal: **"frontend developer"**)
+• Tanya **"cara melamar"** untuk info aplikasi`;
+            }
+
+            generateJobsResponse(entities) {
+                let response = `## 💼 **Lowongan Kerja Terbaru**\n\n`;
+
+                if (entities.jobTitles.length > 0) {
+                    // User interested in specific jobs
+                    entities.jobTitles.forEach((job, index) => {
+                        response += this.formatJobDetails(job, index + 1);
+                    });
+                } else {
+                    // Show all jobs
+                    COMPANY_DATA.jobs.forEach((job, index) => {
+                        response += this.formatJobSummary(job, index + 1);
+                    });
+                }
+
+                response += `\n✨ **Mengapa Bergabung dengan Kami?**
+• Work-life balance yang terjaga
+• Tim yang supportive dan collaborative
+• Learning & development opportunities
+• Competitive salary + benefits
+• Flexible working arrangement
+
+💡 **Tips:** Ketik nama posisi untuk info detail atau **"cara melamar"** untuk panduan aplikasi!`;
+
+                return response;
+            }
+
+            generateSpecificJobResponse(entities) {
+                if (entities.jobTitles.length === 0) {
+                    return this.generateJobsResponse(entities);
+                }
+
+                const job = entities.jobTitles[0];
+                return this.formatJobDetails(job, null, true);
+            }
+
+            formatJobSummary(job, index) {
+                return `**${index}. ${job.title}** | ${job.department}
+💰 ${job.salary_range} • 📍 ${job.location} • ⏰ ${job.type}
+
+`;
+            }
+
+            formatJobDetails(job, index = null, detailed = false) {
+                let response = `${index ? `**${index}. ` : '## '}**${job.title}**${index ? '' : ' 🚀'}\n`;
+                
+                response += `**📊 Department:** ${job.department}\n`;
+                response += `**📍 Lokasi:** ${job.location}\n`;
+                response += `**💰 Gaji:** ${job.salary_range}\n`;
+                response += `**⏰ Tipe:** ${job.type}\n\n`;
+
+                if (detailed) {
+                    response += `**📝 Deskripsi:**\n${job.description}\n\n`;
+                }
+
+                response += `**✅ Requirements:**\n`;
+                job.requirements.forEach(req => {
+                    response += `• ${req}\n`;
+                });
+
+                response += `\n**🎁 Benefits:**\n`;
+                job.benefits.forEach(benefit => {
+                    response += `• ${benefit}\n`;
+                });
+
+                response += '\n';
+                return response;
+            }
+
+            generateSalaryResponse() {
+                let response = `## 💰 **Range Gaji & Kompensasi**\n\n`;
+
+                COMPANY_DATA.jobs.forEach((job, index) => {
+                    response += `**${index + 1}. ${job.title}**\n`;
+                    response += `💵 Gaji: **${job.salary_range}**\n`;
+                    response += `🎁 Benefits: ${job.benefits.slice(0, 2).join(', ')}\n\n`;
+                });
+
+                response += `**💡 Info Tambahan:**
+• Gaji dapat disesuaikan berdasarkan pengalaman dan skill level
+• Review gaji dilakukan setiap tahun
+• Performance bonus hingga 2-4 bulan gaji
+• Stock options untuk senior positions
+• Annual increment rata-rata 10-15%
+
+**Benefits Standard:**
+✅ Asuransi kesehatan (karyawan + keluarga)
+✅ Tunjangan transportasi & makan
+✅ Learning budget Rp 5-10 juta/tahun
+✅ Flexible working hours
+✅ Annual company retreat`;
+
+                return response;
+            }
+
+            generateCompanyResponse() {
+                return `## 🏢 **Tentang ${COMPANY_DATA.profile.name}**
+
+**📋 Profil Perusahaan:**
+${COMPANY_DATA.profile.description}
+
+**🎯 Visi:**
+${COMPANY_DATA.profile.vision}
+
+**🎯 Misi:**
+${COMPANY_DATA.profile.mission}
+
+**📊 Quick Facts:**
+• **Didirikan:** ${COMPANY_DATA.profile.established}
+• **Karyawan:** ${COMPANY_DATA.profile.employees} profesional
+• **Lokasi:** ${COMPANY_DATA.profile.location}
+• **Website:** ${COMPANY_DATA.profile.website}
+• **Email:** ${COMPANY_DATA.profile.email}
+
+**🚀 Kenapa PT. Teknologi Maju Indonesia?**
+
+✨ **Innovation First** - Kami selalu menggunakan teknologi terdepan
+🤝 **People Centric** - Karyawan adalah aset terbesar kami
+🌱 **Growth Mindset** - Continuous learning dan development
+🎯 **Impact Driven** - Setiap project membawa perubahan positif
+🏆 **Work-Life Balance** - Produktivitas tinggi dengan kehidupan seimbang
+
+**🎖️ Achievements:**
+• Top 10 Tech Startup Indonesia 2023
+• Best Workplace Award 2022
+• ISO 27001 Certified
+• 95% Employee Satisfaction Rate`;
+            }
+
+            generateApplicationResponse() {
+                return `## 📝 **Cara Melamar Kerja**
+
+**📧 Step 1: Persiapan Dokumen**
+• ✅ CV terbaru (PDF format)
+• ✅ Portfolio/Portofolio karya
+• ✅ Cover letter (opsional tapi direkomendasikan)
+• ✅ Sertifikat relevan (jika ada)
+
+**📬 Step 2: Kirim Aplikasi**
+• **Email:** ${COMPANY_DATA.profile.email}
+• **Subject:** [Nama Posisi] - [Nama Lengkap Anda]
+• **Contoh:** [Senior Frontend Developer] - John Doe
+
+**📝 Step 3: Template Email**
+\`\`\`
+Subject: [Senior Frontend Developer] - John Doe
+
+Kepada Tim HR PT. Teknologi Maju Indonesia,
+
+Saya tertarik untuk melamar posisi Senior Frontend Developer yang saya lihat di website perusahaan. 
+
+Saya memiliki pengalaman 4 tahun dalam React.js dan JavaScript dengan track record yang baik dalam mengembangkan aplikasi web modern.
+
+Terlampir CV dan portfolio saya untuk review lebih lanjut.
+
+Terima kasih atas perhatiannya.
+
+Hormat saya,
+John Doe
+Phone: 08123456789
+\`\`\`
+
+**⏱️ Proses Seleksi:**
+1. **CV Screening** (2-3 hari)
+2. **HR Interview** (Phone/Video call)
+3. **Technical Test** (Online/Take home)
+4. **Technical Interview** (With team)
+5. **Final Interview** (With manager)
+6. **Offering** 🎉
+
+**💡 Tips Sukses:**
+• Customize CV untuk posisi yang dilamar
+• Tunjukkan passion dan growth mindset
+• Prepare pertanyaan tentang perusahaan
+• Practice coding untuk technical test
+• Be authentic dan show your personality!`;
+            }
+
+            generateBenefitsResponse() {
+                return `## 🎁 **Benefits & Fasilitas Karyawan**
+
+**💊 Health & Wellness**
+• Asuransi kesehatan premium (karyawan + keluarga)
+• Annual health check-up
+• Mental health support & counseling
+• Gym membership subsidy
+• Ergonomic workspace setup
+
+**💰 Financial Benefits**
+• Competitive salary with annual review
+• Performance bonus (2-4 bulan gaji)
+• Stock options program
+• Transportation allowance
+• Meal allowance
+• Mobile phone allowance
+
+**📚 Learning & Development**
+• Learning budget Rp 5-10 juta/tahun
+• Conference & workshop sponsorship
+• Online course subscriptions
+• Internal tech talks & training
+• Mentorship program
+• Career advancement path
+
+**⏰ Work-Life Balance**
+• Flexible working hours (core hours: 10:00-15:00)
+• Hybrid work arrangement
+• 14 hari cuti tahunan + sick leave
+• Parental leave extended
+• Birthday leave
+• Work from anywhere program (1 bulan/tahun)
+
+**🎉 Fun & Engagement**
+• Monthly team building activities
+• Annual company retreat
+• Friday fun activities
+• Gaming corner & relaxation area
+• Free snacks & beverages
+• Company events & celebrations
+
+**🚀 Career Growth**
+• Clear career progression path
+• Regular 1-on-1 dengan manager
+• Internal job posting priority
+• Leadership development program
+• Cross-functional project opportunities
+
+**💡 Unique Perks**
+• Latest MacBook Pro for development
+• Multiple monitor setup
+• Standing desk option
+• Unlimited coffee ☕
+• Pet-friendly office
+• Rooftop garden untuk break`;
+            }
+
+            generateLocationResponse() {
+                return `## 📍 **Lokasi & Akses**
+
+**🏢 Kantor Pusat Jakarta**
+Jl. Sudirman Kav. 52-53, SCBD
+Jakarta Selatan 12190, Indonesia
+
+**🚊 Akses Transportasi:**
+• **MRT:** Stasiun Bendungan Hilir (5 menit jalan kaki)
+• **TransJakarta:** Halte SCBD atau Gelora Bung Karno
+• **KRL:** Stasiun Sudirman (10 menit jalan kaki)
+• **Grab/Gojek:** Pinpoint "PT. Teknologi Maju Indonesia, SCBD"
+
+**🅿️ Parking:**
+• Basement parking tersedia
+• Motorcycle parking area
+• Partner dengan aplikasi parking
+
+**🏠 Remote Work Policy:**
+• **Hybrid:** 3 hari kantor, 2 hari remote
+• **Flexible hours:** Core time 10:00-15:00
+• **WFA Program:** Work from anywhere 1 bulan/tahun
+• **Emergency remote:** Full support saat diperlukan
+
+**🌆 Area Sekitar:**
+• **Mall:** Pacific Place, Senayan City, Plaza Senayan
+• **Food court:** Berbagai pilihan kuliner di SCBD
+• **Gym:** Fitness centers dalam walking distance
+• **Bank:** ATM dan bank dalam komplek
+• **Medical:** Klinik dan apotek terdekat
+
+**🏢 Fasilitas Kantor:**
+• Open space concept dengan meeting rooms
+• Pantry lengkap + coffee machine
+• Prayer room & nursing room
+• Rooftop garden untuk relaxing
+• High-speed internet & backup connection`;
+            }
+
+            generateRemoteResponse() {
+                return `## 💻 **Remote Work & Hybrid Policy**
+
+**🏠 Work From Home Options:**
+• **Hybrid Model:** 3 hari kantor + 2 hari remote
+• **Flexible Schedule:** Core hours 10:00-15:00 WIB
+• **Full Remote:** Available untuk beberapa posisi
+• **Work From Anywhere:** 1 bulan per tahun
+
+**⚙️ Remote Work Setup:**
+• **Laptop:** MacBook Pro M1/M2 terbaru
+• **Monitor:** Dual monitor setup untuk home office
+• **Internet:** Internet allowance Rp 500k/bulan
+• **Desk Setup:** Ergonomic chair & standing desk subsidy
+• **Software:** Semua tools dan lisensi disediakan
+
+**🛠️ Tools & Collaboration:**
+• **Communication:** Slack, Microsoft Teams
+• **Video Conference:** Zoom Pro, Google Meet
+• **Project Management:** Jira, Trello, Notion
+• **Development:** GitHub, GitLab, Docker
+• **Design:** Figma, Adobe Creative Suite
+• **Documentation:** Confluence, GitBook
+
+**📅 Remote Work Guidelines:**
+• Daily standup meeting (online/offline)
+• Weekly 1-on-1 dengan team lead
+• Monthly all-hands meeting (wajib hadir)
+• Quarterly team building (offline)
+
+**🎯 Productive Remote Work:**
+• **Morning sync:** Check-in dengan team
+• **Focused work blocks:** Deep work sessions
+• **Virtual coffee breaks:** Informal team bonding
+• **End-of-day summary:** Progress update
+
+**💡 Remote Work Benefits:**
+• ✅ Zero commute time
+• ✅ Better work-life balance
+• ✅ Increased productivity & focus
+• ✅ Flexible environment setup
+• ✅ Cost savings (transport, meals)
+• ✅ More time with family
+
+**📝 Remote Work Requirements:**
+• Stable internet connection (min 25 Mbps)
+• Quiet, dedicated workspace
+• Professional video call setup
+• Responsive communication during work hours
+• Proactive collaboration & updates`;
+            }
+
+            generateCultureResponse() {
+                return `## 🎨 **Company Culture & Values**
+
+**🌟 Core Values:**
+
+**1. 🚀 Innovation First**
+• Kami selalu mencari cara terbaru dan lebih baik
+• Experimentation dan calculated risks didorong
+• Fail fast, learn faster mentality
+• Technology adoption yang proactive
+
+**2. 🤝 Collaboration Over Competition**
+• Teamwork makes the dream work
+• Knowledge sharing adalah kunci sukses
+• Cross-functional collaboration
+• Mentorship dan peer learning
+
+**3. 🎯 Customer-Centric**
+• User experience adalah prioritas utama
+• Data-driven decision making
+• Continuous feedback loop
+• Empathy dalam setiap product development
+
+**4. 🌱 Growth Mindset**
+• Continuous learning dan improvement
+• Challenge yourself every day
+• Feedback culture yang constructive
+• Personal dan professional development
+
+**5. 🏆 Excellence & Quality**
+• High standards dalam setiap deliverable
+• Attention to detail
+• Code quality dan best practices
+• Continuous integration & delivery
+
+**👥 Team Dynamics:**
+• **Flat Hierarchy:** Easy access ke management
+• **Open Communication:** Transparency di semua level
+• **Inclusive Environment:** Diversity is our strength
+• **Work-Life Integration:** Bukan hanya balance, tapi integration
+
+**🎉 Fun Culture:**
+• **Friday Fun Day:** Games, movie screening, potluck
+• **Monthly Hackathon:** Innovation time
+• **Lunch & Learn:** Knowledge sharing sessions
+• **Celebration Culture:** Achievements, birthdays, milestones
+
+**🏅 Recognition Programs:**
+• **Employee of the Month:** Spotlight achievements
+• **Innovation Awards:** Reward creative solutions
+• **Long Service Awards:** Loyalty appreciation
+• **Peer Recognition:** Shoutouts dan appreciation
+
+**💬 What Our Employees Say:**
+*"Ini bukan hanya tempat kerja, tapi tempat berkembang dan berkarya bersama orang-orang hebat."* - Sarah, Frontend Developer
+
+*"Management sangat supportive untuk growth personal dan karir. Flexibilitas kerja juga luar biasa."* - Andi, Data Scientist
+
+*"Culture nya sangat collaborative. Semua orang siap help dan share knowledge."* - Maya, Product Manager`;
+            }
+
+            generateGeneralResponse(userMessage) {
+                const responses = [
+                    `Terima kasih atas pertanyaan Anda tentang **${COMPANY_DATA.profile.name}**! 
+
+Saya siap membantu dengan informasi yang Anda butuhkan. Berikut beberapa topik yang bisa saya bantu:`,
+                    
+                    `Saya di sini untuk membantu Anda mengenal lebih dekat **${COMPANY_DATA.profile.name}**! 
+
+Ada yang spesifik yang ingin Anda ketahui?`,
+                    
+                    `Senang dapat membantu Anda! Sebagai AI Assistant **${COMPANY_DATA.profile.name}**, saya memiliki informasi lengkap tentang:`
+                ];
+
+                const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                
+                return `${randomResponse}
+
+🏢 **Profil Perusahaan** - Visi, misi, dan sejarah kami
+💼 **Karir & Lowongan** - ${COMPANY_DATA.jobs.length} posisi menarik
+💰 **Gaji & Benefits** - Kompensasi dan fasilitas
+📍 **Lokasi & Remote** - Fleksibilitas kerja
+🎯 **Cara Melamar** - Step-by-step guide
+🎨 **Company Culture** - Values dan work environment
+
+**💡 Contoh pertanyaan:**
+• "Lowongan apa saja yang tersedia?"
+• "Berapa gaji untuk frontend developer?"
+• "Bagaimana cara melamar?"
+• "Ceritakan tentang company culture"
+• "Apakah bisa remote work?"`;
+            }
+
+            generateFollowUpSuggestions(analysis) {
+                const suggestions = [];
+
+                if (analysis.intent === 'greeting') {
+                    suggestions.push('Ketik "lowongan kerja" untuk melihat posisi available');
+                } else if (analysis.intent === 'jobs') {
+                    suggestions.push('Tanya detail posisi: "frontend developer"');
+                    suggestions.push('Info gaji: "salary range"');
+                } else if (analysis.intent === 'specific_job') {
+                    suggestions.push('Tanya "cara melamar" untuk next steps');
+                    suggestions.push('Info "benefits" untuk fasilitas karyawan');
+                } else if (analysis.intent === 'company') {
+                    suggestions.push('Tanya "company culture" untuk work environment');
+                    suggestions.push('Info "lokasi kantor" untuk akses transportasi');
+                }
+
+                if (suggestions.length > 0) {
+                    return `\n\n**💡 Quick Actions:**\n• ${suggestions.join('\n• ')}`;
+                }
+
+                return `\n\n**💬 Pertanyaan lain? Silakan tanya apa saja tentang ${COMPANY_DATA.profile.name}!**`;
+            }
+
+            // Add conversation context dan personalization
+            addToHistory(message, isUser = true) {
+                this.chatHistory.push({
+                    message: message,
+                    isUser: isUser,
+                    timestamp: new Date(),
+                    context: this.currentContext
+                });
+
+                // Keep only last 10 conversations for efficiency
+                if (this.chatHistory.length > 10) {
+                    this.chatHistory = this.chatHistory.slice(-10);
+                }
+            }
+
+            // Main process function
+            processMessage(userMessage) {
+                this.addToHistory(userMessage, true);
+                const response = this.generateResponse(userMessage);
+                this.addToHistory(response, false);
+                
+                console.log('💬 Chat History Length:', this.chatHistory.length);
+                console.log('👤 User Profile:', this.userProfile);
+                
+                return response;
+            }
+        }
+
+        // Chat UI Manager
+        class ChatUIManager {
+            constructor() {
+                this.aiAssistant = new SmartAIAssistant();
+                this.initializeElements();
+                this.setupEventListeners();
+                this.showWelcomeMessage();
+            }
+
+            initializeElements() {
+                this.chatModal = new bootstrap.Modal(document.getElementById('chatModal'));
+                this.chatContainer = document.getElementById('chatContainer');
+                this.messageInput = document.getElementById('messageInput');
+                this.sendButton = document.getElementById('sendButton');
+                this.resetButton = document.getElementById('resetChat');
+                this.typingIndicator = document.querySelector('.typing-indicator');
+            }
+
+            setupEventListeners() {
+                // Modal triggers
+                document.getElementById('openChatModal')?.addEventListener('click', () => this.chatModal.show());
+                document.getElementById('herooChatButton')?.addEventListener('click', () => this.chatModal.show());
+                document.getElementById('fabChatbot')?.addEventListener('click', () => this.chatModal.show());
+
+                // Chat controls
+                this.sendButton?.addEventListener('click', () => this.sendMessage());
+                this.messageInput?.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !this.sendButton.disabled) {
+                        this.sendMessage();
+                    }
+                });
+                this.resetButton?.addEventListener('click', () => this.resetChat());
+
+                // Focus management
+                document.getElementById('chatModal')?.addEventListener('shown.bs.modal', () => {
+                    this.messageInput?.focus();
+                });
+
+                // Job inquiry buttons
+                document.querySelectorAll('.ask-chatbot').forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        const jobTitle = e.target.getAttribute('data-job') || 
+                                       e.target.closest('button').getAttribute('data-job');
+                        this.chatModal.show();
+                        setTimeout(() => {
+                            if (this.messageInput) {
+                                this.messageInput.value = `Ceritakan lebih detail tentang posisi ${jobTitle}`;
+                                this.messageInput.focus();
+                            }
+                        }, 300);
+                    });
+                });
+            }
+
+            showWelcomeMessage() {
+                // Clear container first
+                if (this.chatContainer) {
+                    this.chatContainer.innerHTML = '';
+                    this.addMessage(
+                        "Halo! Saya **Smart AI Assistant** dari PT. Teknologi Maju Indonesia 🤖\n\nSaya siap membantu Anda dengan informasi perusahaan dan lowongan kerja. Apa yang ingin Anda ketahui?",
+                        false
+                    );
+                }
+            }
+
+            addMessage(message, isUser = false, isError = false) {
+                if (!this.chatContainer) return;
+
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user-message' : (isError ? 'bot-message error-message' : 'bot-message')}`;
+
+                if (isUser) {
+                    messageDiv.innerHTML = `<span class="message-content">${this.escapeHtml(message)}</span>`;
+                } else {
+                    try {
+                        const htmlContent = marked ? marked.parse(message) : this.parseMarkdown(message);
+                        messageDiv.innerHTML = `<i class="bi bi-robot me-2"></i> <span class="message-content">${htmlContent}</span>`;
+                    } catch (error) {
+                        console.warn('Markdown parsing error:', error);
+                        messageDiv.innerHTML = `<i class="bi bi-robot me-2"></i> <span class="message-content">${this.parseMarkdown(message)}</span>`;
+                    }
+                }
+
+                this.chatContainer.appendChild(messageDiv);
+                this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+                return messageDiv;
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+
+            parseMarkdown(text) {
+                return text
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`(.*?)`/g, '<code>$1</code>')
+                    .replace(/^##\s(.+)$/gm, '<h4>$1</h4>')
+                    .replace(/^#\s(.+)$/gm, '<h3>$1</h3>')
+                    .replace(/^\•\s(.+)$/gm, '<li>$1</li>')
+                    .replace(/\n/g, '<br>');
+            }
+
+            showTypingIndicator() {
+                if (this.typingIndicator) {
+                    this.typingIndicator.style.display = 'block';
+                    this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+                }
+            }
+
+            hideTypingIndicator() {
+                if (this.typingIndicator) {
+                    this.typingIndicator.style.display = 'none';
+                }
+            }
+
+            async sendMessage() {
+                const message = this.messageInput?.value.trim();
+                if (!message || this.sendButton?.disabled) return;
+
+                // Add user message
+                this.addMessage(message, true);
+                if (this.messageInput) this.messageInput.value = '';
+                
+                // Disable send button and show loading
+                if (this.sendButton) {
+                    this.sendButton.disabled = true;
+                    this.sendButton.classList.add('loading');
+                }
+
+                // Show typing indicator
+                this.showTypingIndicator();
+
+                try {
+                    // Simulate thinking time for better UX
+                    await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 1000));
+
+                    // Get AI response
+                    const response = this.aiAssistant.processMessage(message);
+
+                    // Hide typing indicator
+                    this.hideTypingIndicator();
+
+                    // Add AI response
+                    this.addMessage(response, false);
+
+                } catch (error) {
+                    console.error('Message processing error:', error);
+                    this.hideTypingIndicator();
+                    this.addMessage(
+                        'Maaf, terjadi kesalahan. Silakan coba lagi atau hubungi tim support kami di hr@teknologimaju.co.id',
+                        false,
+                        true
+                    );
+                }
+
+                // Re-enable send button
+                if (this.sendButton) {
+                    this.sendButton.disabled = false;
+                    this.sendButton.classList.remove('loading');
+                }
+                if (this.messageInput) this.messageInput.focus();
+            }
+
+            resetChat() {
+                // Reset AI assistant
+                this.aiAssistant = new SmartAIAssistant();
+                
+                // Clear chat and show welcome message
+                this.showWelcomeMessage();
+                
+                console.log('🔄 Chat reset successfully');
+            }
+        }
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🚀 PT. Teknologi Maju Indonesia - Company Profile Loaded!');
+            
+            try {
+                // Initialize chat system
+                const chatManager = new ChatUIManager();
+                window.chatManager = chatManager; // For debugging
+
+                // Smooth scrolling for navigation
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const target = document.querySelector(this.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }
+                    });
+                });
+
+                console.log('✅ Application initialized successfully!');
+                console.log('🤖 Smart AI Assistant is ready to help!');
+                
+            } catch (error) {
+                console.error('❌ Failed to initialize application:', error);
+            }
+        });
+
+        // Global error handling
+        window.addEventListener('error', function(e) {
+            console.error('Global error:', e.error);
+        });
+
+        window.addEventListener('unhandledrejection', function(e) {
+            console.error('Unhandled promise rejection:', e.reason);
+        });
+
+        // Success message
+        console.log('🎉 PT. Teknologi Maju Indonesia Smart AI Assistant Ready!');
+        console.log('💡 No server needed - Everything runs locally in browser!');
+    </script>
+
+</body>
+
+</html>
